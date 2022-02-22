@@ -157,7 +157,6 @@ static bool recalc_sigpending_tsk(struct task_struct *t)
 	    PENDING(&t->pending, &t->blocked) ||
 	    PENDING(&t->signal->shared_pending, &t->blocked) ||
 	    cgroup_task_frozen(t)) {
-		set_tsk_thread_flag(t, TIF_SIGPENDING);
 		return true;
 	}
 
@@ -2325,7 +2324,8 @@ static void ptrace_stop(int exit_code, int why, int clear_code, kernel_siginfo_t
 	 * So check for any that we should take before resuming user mode.
 	 * This sets TIF_SIGPENDING, but never clears it.
 	 */
-	recalc_sigpending_tsk(current);
+	if (recalc_sigpending_tsk(current))
+		set_tsk_thread_flag(current, TIF_SIGPENDING);
 }
 
 static void ptrace_do_notify(int signr, int exit_code, int why)
